@@ -105,7 +105,7 @@ new_user() {
         echo "Enter username:"
         read uname
         # Check for existing user
-        if id "$uname" &>/dev/null; then
+        if id "$uname" > /dev/null 2>&1; then
             echo "User $uname already exists"
         else
             break
