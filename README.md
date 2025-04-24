@@ -15,12 +15,10 @@ The script supports the following arguments (only one of these can be used at a 
 | Argument         | Description                                      |
 |------------------|--------------------------------------------------|
 | `-b`, `--background` | Copies the `gnome.png` file to a specified directory.|
-| `-c`, `--copyright`  | Displays a copyright notice.                 |
 | `-h`, `--help`       | Lists all available arguments.               |
 | `-l`, `--license`    | Displays license information.                |
 | `-p`, `--package`    | Installs additional packages.                |
 | `-v`, `--version`    | Displays version information.                |
-| `-w`, `--warranty`   | Displays a warranty notice.                  |
 
 ### Notes:
 - When used with `sudo`, -b copies the file to the user's `Pictures` directory. If run as root, it asks for a destination directory.
