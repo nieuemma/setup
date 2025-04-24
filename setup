@@ -27,7 +27,7 @@ handle_error() {
     exit 1
 }
 
-# Check if running as sudo/root
+# Check if running with root privileges
 root_check() {
     if [ "$EUID" -ne 0 ]; then
         handle_error "This script must be run as root or with sudo"
@@ -65,14 +65,17 @@ arg_proc() {
                 fi
                 ;;
             --license|-l)
+                # Display GPL license message
                 echo "$GPL"
                 exit 0
                 ;;
             --version|-v)
+                # Display program version
                 echo "nieuemma setup $VERSION"
                 exit 0
                 ;;
             --help|-h)
+                # Display available options
                 echo "  -b, --background  Get a cool desktop background"
                 echo "  -h, --help        Display this help message"
                 echo "  -l, --license     Display license information"
@@ -87,6 +90,30 @@ arg_proc() {
         esac
         shift
     done
+}
+
+# Ask to create new user (if root)
+new_user() {
+    # Skip if running with sudo
+    [ -n "$SUDO_USER" ] && return
+    # Ask to create new user
+    echo "Would you like to create a new user? y/N"
+    read yn
+    [ "$yn" != "y" ] && return
+    echo "Enter username:"
+    read uname
+    useradd -m $uname
+    passwd $uname
+    # Ask to add user to admin groups
+    echo "Add $uname to wheel group? y/N"
+    read yn
+    if [ "$yn" = "y" ]; then
+        usermod -aG wheel $uname
+    else
+        echo "Add $uname to sudo group? y/N"
+        read yn
+        [ "$yn" = "y" ] && usermod -aG sudo $uname
+    fi
 }
 
 # Find package manager and install packages
@@ -104,8 +131,9 @@ else
 fi
 }
 
-# Copy wallpaper to (if sudo) ~/Pictures or (if root) chosen directory
+# Copy wallpaper to ~/Pictures or chosen directory if root
 wallpaper_copy() {
+    #copy to ~/Pictures if sudo
 if [ -n "$SUDO_HOME" ]; then
     if [ ! -d "$SUDO_HOME/Pictures" ]; then
         mkdir -p "$SUDO_HOME/Pictures"
@@ -113,13 +141,12 @@ if [ -n "$SUDO_HOME" ]; then
         cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/Pictures/gnome.png"
         echo "image copied to $SUDO_HOME/Pictures"
 else
+    # Copy to specified directory if root
     echo "Please specify a destination"
-
     read dir_path
-    if [ ! -d "$dir_path" ]; then
-        mkdir -p "$dir_path"
-        chmod 777 "$dir_path"
-    fi
+    # If path does not exist, create it and set permissions
+    [ ! -d "$dir_path" ] && mkdir -p "$dir_path" && chmod 777 "$dir_path"
+    # Copy the image file
         cp "$(dirname "$0")/gnome.png" "$dir_path/gnome.png"
         echo "image copied to $dir_path"
     fi
@@ -129,4 +156,5 @@ else
 root_check
 conf_load
 arg_proc "$@"
+new_user
 pkg_install
