@@ -100,19 +100,26 @@ new_user() {
     echo "Would you like to create a new user? y/N"
     read yn
     [ "$yn" != "y" ] && return
-    echo "Enter username:"
-    read uname
+    # Get username
+    while true; do
+        echo "Enter username:"
+        read uname
+        # Check for existing user
+        if id "$uname" &>/dev/null; then
+            echo "User $uname already exists"
+        else
+            break
+        fi
+    done
+    # Create user
     useradd -m $uname
     passwd $uname
     # Ask to add user to admin groups
-    echo "Add $uname to wheel group? y/N"
+    echo "Should $uname an admin? y/N"
     read yn
     if [ "$yn" = "y" ]; then
-        usermod -aG wheel $uname
-    else
-        echo "Add $uname to sudo group? y/N"
-        read yn
-        [ "$yn" = "y" ] && usermod -aG sudo $uname
+        touch /etc/sudoers.d/$uname
+        echo "$uname ALL=(ALL:ALL) ALL" > "/etc/sudoers.d/$uname"
     fi
 }
 
