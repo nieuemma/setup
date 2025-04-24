@@ -7,19 +7,25 @@
 - also comes with my awesome wallpaper
 
 ## Basic Usage
-Simply running the script will install the Gnome desktop environment and a few choice programs. I decided initally to make a script because installing Gnome gives you a lot of default apps and things I don't want or need. I enjoy having a working Gnome desktop with ~2GiB of space used (as measured with a fresh Arch Linux installation).
-The following arguments are available when running the script, but only one argument at a time. Multiple arguments will simply run the first argument.
+Simply running the script will install a basic Gnome desktop environment.\
+I decided to make a script because Gnome includes a lot of extra software.
 
--b or --background        Copy gnome.png\
--c or --copyright         Displays a copyright notice\
--h or --help              Lists available arguments\
--l or --license           Displays license information\
--p or --package           Install additional packages\
--v or --version           Displays version information\
--w or --warranty          Displays warranty notice
+The script supports the following arguments (only one of these can be used at a time):
 
-  When using -b or --background as a normal user with sudo, the script will copy the gnome.png file to the user's Pictures directory. If run as root, it will ask you to specify a destination directory.
+| Argument         | Description                                      |
+|------------------|--------------------------------------------------|
+| `-b`, `--background` | Copies the `gnome.png` file to a specified directory.|
+| `-c`, `--copyright`  | Displays a copyright notice.                 |
+| `-h`, `--help`       | Lists all available arguments.               |
+| `-l`, `--license`    | Displays license information.                |
+| `-p`, `--package`    | Installs additional packages.                |
+| `-v`, `--version`    | Displays version information.                |
+| `-w`, `--warranty`   | Displays a warranty notice.                  |
 
-  More functionality will be added in the future.
-  This is my first project, as I am new to programming.
-  I designed this script for my own use, but it would be wonderful if others found it useful as well. Please feel free to recommend improvements or report issues. I would also appreciate any critiques of my scripting style, as I am just beginning to learn and improve my coding skills.
+### Notes:
+- When used with `sudo`, -b copies the file to the user's `Pictures` directory. If run as root, it asks for a destination directory.
+- The -p option allows you to list package names as additional arguments.
+- More functionality is planned for the future.
+- This is my first project, as I am new to programming.
+- I designed this script for my own use, but it's nice if others find it useful as well.
+- Please feel free to recommend improvements or report issues.
