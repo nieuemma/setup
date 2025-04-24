@@ -76,7 +76,7 @@ arg_proc() {
                 exit 0
                 ;;
             --version|-v)
-                echo "setup.sh $VERSION"
+                echo "nieuemma setup $VERSION"
                 exit 0
                 ;;
             --help|-h)
