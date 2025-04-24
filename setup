@@ -118,8 +118,8 @@ new_user() {
     echo "Should $uname an admin? y/N"
     read yn
     if [ "$yn" = "y" ]; then
-        getent group wheel && usermod -aG wheel $uname
-        getent group sudo && usermod -aG sudo $uname
+        getent group wheel > /dev/null 2>&1 && usermod -aG wheel $uname
+        getent group sudo > /dev/null 2>&1 && usermod -aG sudo $uname
         touch /etc/sudoers.d/$uname
         echo "$uname ALL=(ALL:ALL) ALL" > "/etc/sudoers.d/$uname"
     fi
