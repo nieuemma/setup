@@ -55,8 +55,8 @@ arg_proc() {
                 break
                 ;;
             --copyright|-c)
-                 echo "$GPL_CP"
-                 exit 0
+                echo "$GPL_CP"
+                exit 0
                 ;;
             --warranty|-w)
                 echo "$GPL_WR"
@@ -141,7 +141,6 @@ else
         echo "image copied to $dir_path"
     fi
 }
-
 
 # Execute functions
 root_check
