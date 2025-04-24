@@ -22,12 +22,12 @@ PKG_FAIL="Package installation failed"
 
 # Set error handling
 handle_error() {
-    echo "Error: $1" >&2
+    echo "$1" >&2
     exit 1
 }
 
-# Require run as root
-require_root() {
+# Check if running as sudo/root
+root_check() {
     if [ "$EUID" -ne 0 ]; then
         handle_error "This script must be run as root or with sudo"
     fi
@@ -43,9 +43,17 @@ conf_load() {
 }
 
 # Process arguments
-arguments() {
+arg_proc() {
     while [ $# -gt 0 ]; do
         case "$1" in
+            --package|-p)
+                shift
+                if [ "$#" -eq 0 ]; then
+                    handle_error "Usage: $0 --package <pkg1> <pkg2> ..."
+                fi
+                ADD_PKG="$@"
+                break
+                ;;
             --copyright|-c)
                  echo "$GPL_CP"
                  exit 0
@@ -60,7 +68,7 @@ arguments() {
                     wallpaper_copy
                     exit 0
                 else
-                    handle_error "file not found"
+                    handle_error "Wallpaper file not found"
                 fi
                 ;;
             --license|-l)
@@ -72,19 +80,18 @@ arguments() {
                 exit 0
                 ;;
             --help|-h)
-                echo "Usage: $0 [--warranty] [--copyright]"
                 echo "  --background|-b  Copy wallpaper to backgrounds directory"
                 echo "  --copyright|-c   Display copyright information"
                 echo "  --help|-h        Display this help message"
                 echo "  --license|-l     Display license information"
+                echo "  --package|-p     Install additional packages"
                 echo "  --version|-v     Display version information"
                 echo "  --warranty|-w    Display warranty information"
                 exit 0
                 ;;
             *)
-                echo "Unknown option: $1" >&2
-                echo "Try '$0 --help' for more information." >&2
-                exit 1
+                echo "Invalid option: $1"
+                handle_error "Try --help for more information"
                 ;;
         esac
         shift
@@ -93,26 +100,28 @@ arguments() {
 
 # Display GPL notice
 gpl_notice() {
+        echo ""
         echo "$GPL"
-        sleep 6
+        echo ""
+        sleep 3
 }
 
 # Find package manager and install packages
 pkmn_check() {
 if command -v apt > /dev/null 2>&1; then
-    apt install -y $DEB_PKG || handle_error $PKG_FAIL
+    apt install -y $DEB_PKG $ADD_PKG || handle_error $PKG_FAIL
 elif command -v dnf > /dev/null 2>&1; then
-    dnf install -y $RHL_PKG || handle_error $PKG_FAIL
+    dnf install -y $RHL_PKG $ADD_PKG || handle_error $PKG_FAIL
 elif command -v yum > /dev/null 2>&1; then
-    yum install -y $RHL_PKG || handle_error $PKG_FAIL
+    yum install -y $RHL_PKG $ADD_PKG || handle_error $PKG_FAIL
 elif command -v pacman > /dev/null 2>&1; then
-    pacman -S --noconfirm --needed $ARCH_PKG || handle_error $PKG_FAIL
+    pacman -S --noconfirm --needed $ARCH_PKG $ADD_PKG || handle_error $PKG_FAIL
 else
     handle_error "No supported package manager found"
 fi
 }
 
-# Copy wallpaper to backgrounds directory
+# Copy wallpaper to (if sudo) ~/Pictures or (if root) chosen directory
 wallpaper_copy() {
 if [ -n "$SUDO_HOME" ]; then
     if [ ! -d "$SUDO_HOME/Pictures" ]; then
@@ -121,7 +130,8 @@ if [ -n "$SUDO_HOME" ]; then
         cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/Pictures/gnome.png"
         echo "image copied to $SUDO_HOME/Pictures"
 else
-    echo "Please choose a directory"
+    echo "Please specify a destination"
+
     read dir_path
     if [ ! -d "$dir_path" ]; then
         mkdir -p "$dir_path"
@@ -134,8 +144,8 @@ else
 
 
 # Execute functions
-require_root
+root_check
 conf_load
-arguments "$@"
+arg_proc "$@"
 gpl_notice
 pkmn_check
