@@ -80,13 +80,13 @@ arg_proc() {
                 exit 0
                 ;;
             --help|-h)
-                echo "  --background|-b  Copy wallpaper to backgrounds directory"
-                echo "  --copyright|-c   Display copyright information"
-                echo "  --help|-h        Display this help message"
-                echo "  --license|-l     Display license information"
-                echo "  --package|-p     Install additional packages"
-                echo "  --version|-v     Display version information"
-                echo "  --warranty|-w    Display warranty information"
+                echo "  -b, --background  Get a cool desktop background"
+                echo "  -c, --copyright   Display copyright information"
+                echo "  -h, --help        Display this help message"
+                echo "  -l, --license     Display license information"
+                echo "  -p, --package     Install additional packages"
+                echo "  -v, --version     Display version information"
+                echo "  -w, --warranty    Display warranty information"
                 exit 0
                 ;;
             *)
