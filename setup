@@ -131,15 +131,26 @@ else
 fi
 }
 
-# Copy wallpaper to ~/Pictures or chosen directory if root
+# Ask to start GDM
+ask_gdm() {
+    echo "Enable Gnome display manager now? Y/n"
+    read yn
+    if [ "$yn" = "n" ]; then
+       exit 0
+    else
+        systemctl enable --now gdm
+    fi
+}
+
+# Copy wallpaper to backgrounds folder or chosen directory if root
 wallpaper_copy() {
     #copy to ~/Pictures if sudo
 if [ -n "$SUDO_HOME" ]; then
-    if [ ! -d "$SUDO_HOME/Pictures" ]; then
-        mkdir -p "$SUDO_HOME/Pictures"
+    if [ ! -d "$SUDO_HOME/.local/share/backgrounds" ]; then
+        mkdir -p "$SUDO_HOME/.local/share/backgrounds"
     fi
-        cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/Pictures/gnome.png"
-        echo "image copied to $SUDO_HOME/Pictures"
+        cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/.local/share/backgrounds/gnome.png"
+        echo "image copied to $SUDO_HOME/.local/share/backgrounds"
 else
     # Copy to specified directory if root
     echo "Please specify a destination"
@@ -158,3 +169,4 @@ conf_load
 arg_proc "$@"
 new_user
 pkg_install
+ask_gdm
