@@ -13,6 +13,7 @@
 
 #   You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#        Contact the author at https://github.com/nieuemma
 
 # Default config file path
 CONF_FILE="$(dirname "$0")/setup.conf"
@@ -54,14 +55,6 @@ arg_proc() {
                 ADD_PKG="$@"
                 break
                 ;;
-            --copyright|-c)
-                echo "$GPL_CP"
-                exit 0
-                ;;
-            --warranty|-w)
-                echo "$GPL_WR"
-                exit 0
-                ;;
             --background|-b)
                 # copy wallpaper to backgrounds directory
                 if [ -f "$(dirname "$0")/gnome.png" ]; then
@@ -72,7 +65,7 @@ arg_proc() {
                 fi
                 ;;
             --license|-l)
-                echo "$GPL_INFO"
+                echo "$GPL"
                 exit 0
                 ;;
             --version|-v)
@@ -81,12 +74,10 @@ arg_proc() {
                 ;;
             --help|-h)
                 echo "  -b, --background  Get a cool desktop background"
-                echo "  -c, --copyright   Display copyright information"
                 echo "  -h, --help        Display this help message"
                 echo "  -l, --license     Display license information"
                 echo "  -p, --package     Install additional packages"
                 echo "  -v, --version     Display version information"
-                echo "  -w, --warranty    Display warranty information"
                 exit 0
                 ;;
             *)
@@ -98,16 +89,8 @@ arg_proc() {
     done
 }
 
-# Display GPL notice
-gpl_notice() {
-        echo ""
-        echo "$GPL"
-        echo ""
-        sleep 3
-}
-
 # Find package manager and install packages
-pkmn_check() {
+pkg_install() {
 if command -v apt > /dev/null 2>&1; then
     apt install -y $DEB_PKG $ADD_PKG || handle_error $PKG_FAIL
 elif command -v dnf > /dev/null 2>&1; then
@@ -146,5 +129,4 @@ else
 root_check
 conf_load
 arg_proc "$@"
-gpl_notice
-pkmn_check
+pkg_install
