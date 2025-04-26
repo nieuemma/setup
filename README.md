@@ -21,7 +21,6 @@ The script supports the following arguments (only one of these can be used at a 
 | `-v`, `--version`    | Displays version information.                |
 
 ### Notes:
-- When used with `sudo`, -b copies the file to the user's `Pictures` directory. If run as root, it asks for a destination directory.
 - The -p option allows you to list package names as additional arguments.
 - This is my first program, as I am new to coding.
 - I designed this script for my own use, but it's nice if others find it useful as well.
