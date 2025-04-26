@@ -23,153 +23,153 @@ PKG_FAIL="Package installation failed"
 
 # Set error handling
 handle_error() {
-    echo "$1" >&2
-    exit 1
+  echo "$1" >&2
+  exit 1
 }
 
 # Check if running with root privileges
 root_check() {
-    if [ "$EUID" -ne 0 ]; then
-        handle_error "This script must be run as root or with sudo"
-    fi
+  if [ "$EUID" -ne 0 ]; then
+    handle_error "This script must be run as root or with sudo"
+  fi
 }
 
 # Load configuration file
 conf_load() {
-    if [ -f "$CONF_FILE" ]; then
-        . "$CONF_FILE"
-    else
-        handle_error "Configuration file not found"
-    fi
+  if [ -f "$CONF_FILE" ]; then
+    . "$CONF_FILE"
+  else
+    handle_error "Configuration file not found"
+  fi
 }
 
 # Process arguments
 arg_proc() {
-    while [ $# -gt 0 ]; do
-        case "$1" in
-            --package|-p)
-                shift
-                if [ "$#" -eq 0 ]; then
-                    handle_error "Usage: $0 --package <pkg1> <pkg2> ..."
-                fi
-                ADD_PKG="$@"
-                break
-                ;;
-            --background|-b)
-                # copy wallpaper to backgrounds directory
-                if [ -f "$(dirname "$0")/gnome.png" ]; then
-                    wallpaper_copy
-                    exit 0
-                else
-                    handle_error "Wallpaper file not found"
-                fi
-                ;;
-            --license|-l)
-                # Display GPL license message
-                echo "$GPL"
-                exit 0
-                ;;
-            --version|-v)
-                # Display program version
-                echo "nieuemma setup $VERSION"
-                exit 0
-                ;;
-            --help|-h)
-                # Display available options
-                echo "  -b, --background  Get a cool desktop background"
-                echo "  -h, --help        Display this help message"
-                echo "  -l, --license     Display license information"
-                echo "  -p, --package     Install additional packages"
-                echo "  -v, --version     Display version information"
-                exit 0
-                ;;
-            *)
-                echo "Invalid option: $1"
-                handle_error "Try --help for more information"
-                ;;
-        esac
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --package|-p)
         shift
-    done
+        if [ "$#" -eq 0 ]; then
+          handle_error "Usage: $0 --package <pkg1> <pkg2> ..."
+        fi
+        ADD_PKG="$@"
+        break
+        ;;
+      --background|-b)
+        # copy wallpaper to backgrounds directory
+        if [ -f "$(dirname "$0")/gnome.png" ]; then
+          wallpaper_copy
+          exit 0
+        else
+          handle_error "Wallpaper file not found"
+        fi
+        ;;
+      --license|-l)
+        # Display GPL license message
+        echo "$GPL"
+        exit 0
+        ;;
+      --version|-v)
+        # Display program version
+        echo "nieuemma setup $VERSION"
+        exit 0
+        ;;
+      --help|-h)
+        # Display available options
+        echo "  -b, --background  Get a cool desktop background"
+        echo "  -h, --help        Display this help message"
+        echo "  -l, --license     Display license information"
+        echo "  -p, --package     Install additional packages"
+        echo "  -v, --version     Display version information"
+        exit 0
+        ;;
+      *)
+        echo "Invalid option: $1"
+        handle_error "Try --help for more information"
+        ;;
+    esac
+    shift
+  done
 }
 
 # Ask to create new user (if root)
 user_add() {
-    # Skip if running with sudo
-    [ -n "$SUDO_USER" ] && return
-    # Ask to create new user
-    echo "Would you like to create a new user? y/N"
-    read yn
-    [ "$yn" != "y" ] && return
-    # Get username
-    while true; do
-        echo "Enter username:"
-        read uname
-        # Check for existing user
-        if id "$uname" > /dev/null 2>&1; then
-            echo "User $uname already exists"
-        else
-            break
-        fi
-    done
-    # Create user
-    useradd -m $uname
-    passwd $uname
-    # Ask to add user to admin groups
-    echo "Should $uname an admin? y/N"
-    read yn
-    if [ "$yn" = "y" ]; then
-        getent group wheel > /dev/null 2>&1 && usermod -aG wheel $uname
-        getent group sudo > /dev/null 2>&1 && usermod -aG sudo $uname
-        touch /etc/sudoers.d/$uname
-        echo "$uname ALL=(ALL:ALL) ALL" > "/etc/sudoers.d/$uname"
+  # Skip if running with sudo
+  [ -n "$SUDO_USER" ] && return
+  # Ask to create new user
+  echo "Would you like to create a new user? y/N"
+  read yn
+  [ "$yn" != "y" ] && return
+  # Get username
+  while true; do
+    echo "Enter username:"
+    read uname
+    # Check for existing user
+    if id "$uname" > /dev/null 2>&1; then
+      echo "User $uname already exists"
+    else
+      break
     fi
+  done
+  # Create user
+  useradd -m $uname
+  passwd $uname
+  # Ask to add user to admin groups
+  echo "Should $uname an admin? y/N"
+  read yn
+  if [ "$yn" = "y" ]; then
+    getent group wheel > /dev/null 2>&1 && usermod -aG wheel $uname
+    getent group sudo > /dev/null 2>&1 && usermod -aG sudo $uname
+    touch /etc/sudoers.d/$uname
+    echo "$uname ALL=(ALL:ALL) ALL" > "/etc/sudoers.d/$uname"
+  fi
 }
 
 # Find package manager and install packages
 pkg_install() {
-if command -v apt > /dev/null 2>&1; then
+  if command -v apt > /dev/null 2>&1; then
     apt install -y $DEB_PKG $ADD_PKG || handle_error $PKG_FAIL
-elif command -v dnf > /dev/null 2>&1; then
+  elif command -v dnf > /dev/null 2>&1; then
     dnf install -y $RHL_PKG $ADD_PKG || handle_error $PKG_FAIL
-elif command -v yum > /dev/null 2>&1; then
+  elif command -v yum > /dev/null 2>&1; then
     yum install -y $RHL_PKG $ADD_PKG || handle_error $PKG_FAIL
-elif command -v pacman > /dev/null 2>&1; then
+  elif command -v pacman > /dev/null 2>&1; then
     pacman -S --noconfirm --needed $ARCH_PKG $ADD_PKG || handle_error $PKG_FAIL
-else
+  else
     handle_error "No supported package manager found"
-fi
+  fi
 }
 
 # Ask to start the desktop
 gdm_ask() {
-    echo "Enable Gnome display manager now? Y/n"
-    read yn
-    if [ "$yn" = "n" ]; then
-       return
-    else
-        systemctl enable --now gdm
-    fi
+  echo "Enable Gnome display manager now? Y/n"
+  read yn
+  if [ "$yn" = "n" ]; then
+    return
+  else
+    systemctl enable --now gdm
+  fi
 }
 
 # Copy wallpaper to backgrounds folder or chosen directory if root
 wallpaper_copy() {
-    #copy to home if sudo
-if [ -n "$SUDO_HOME" ]; then
+  #copy to home if sudo
+  if [ -n "$SUDO_HOME" ]; then
     if [ ! -d "$SUDO_HOME/.local/share/backgrounds" ]; then
-        mkdir -p "$SUDO_HOME/.local/share/backgrounds"
+      mkdir -p "$SUDO_HOME/.local/share/backgrounds"
     fi
-        cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/.local/share/backgrounds/gnome.png"
-        echo "image copied to $SUDO_HOME/.local/share/backgrounds"
-else
+    cp "$(dirname "$0")/gnome.png" "$SUDO_HOME/.local/share/backgrounds/gnome.png"
+    echo "image copied to $SUDO_HOME/.local/share/backgrounds"
+  else
     # Copy to specified directory if root
     echo "Please specify a destination"
     read dir_path
     # If path does not exist, create it and set permissions
     [ ! -d "$dir_path" ] && mkdir -p "$dir_path" && chmod 777 "$dir_path"
     # Copy the image file
-        cp "$(dirname "$0")/gnome.png" "$dir_path/gnome.png"
-        echo "image copied to $dir_path"
-    fi
+    cp "$(dirname "$0")/gnome.png" "$dir_path/gnome.png"
+    echo "image copied to $dir_path"
+  fi
 }
 
 # Execute functions
