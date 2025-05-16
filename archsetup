@@ -1,0 +1,106 @@
+#!/bin/bash
+# Intended for a fresh Arch Linux install, run as root.
+# requires bash 5.0+, internet connection, and git.
+
+# exit on error
+set -eu
+
+# define variables
+USERNAME=
+USER_GIT=
+EMAIL_GIT=
+
+# check bash version
+if ((BASH_VERSINFO[0] < 5)); then
+    echo "This script requires Bash 5.0 or higher." >&2
+    exit 1
+fi
+
+main() {
+    time_function make_user
+    time_function git_setup
+    time_function config
+    time_function pacman_install
+    time_function rust_setup
+    time_function paru_get
+    time_function paru_install
+#    time_function btrfs_setup
+    echo "cleaning up..."
+    pacman -Sc --noconfirm
+    chsh -s /usr/bin/zsh "$USERNAME"
+    echo "done"
+}
+
+# report how long each function takes to complete
+time_function() {
+    local func="$1"
+    shift
+    local start end elapsed
+    start=$EPOCHREALTIME
+    "$func" "$@"
+    end=$EPOCHREALTIME
+    elapsed=$(awk "BEGIN {print $end - $start}")
+    printf "%s took %.3f seconds\n" "$func" "$elapsed"
+}
+
+# add user, give sudo access, and set password
+make_user() {
+    echo "creating user"
+    useradd -m "$USERNAME"
+    echo "$USERNAME ALL=(ALL:ALL) NOPASSWD: ALL" >>"/etc/sudoers.d/00-$USERNAME"
+    passwd "$USERNAME"
+}
+
+# set username and email for git
+git_setup() {
+    echo "configuring git"
+    git config --global user.name "$USER_GIT"
+    git config --global user.email "$EMAIL_GIT"
+    git config pull.rebase false
+
+}
+
+# clone dotfiles from github/nieuemma
+config() {
+    echo "cloning configuration files"
+    rm -rf "/home/$USERNAME/.config"
+    git clone "https://github.com/nieuemma/config" "/home/$USERNAME/.config"
+    chown -R "$USERNAME" "/home/$USERNAME"
+}
+
+# install packages using pacman
+pacman_install() {
+    echo "installing packages with pacman"
+    pacman -S --noconfirm adw-gtk-theme btrfs-progs discord dosfstools exfatprogs f2fs-tools gimp git github-cli gnome-disk-utility gnome-keyring helix hypridle hyprland hyprlock hyprpaper hyprsunset iwd kitty mpv nautilus nfs-utils obs-studio ollama playerctl qutebrowser rustup rust-analyzer steam swayosd timeshift udftools ufw wget wl-clipboard xdg-desktop-portal-gtk xdg-desktop-portal-hyprland zed zsh
+}
+
+# setup rust
+rust_setup(){
+    echo "setting up rust"
+    rustup default stable
+}
+# install paru aur helper
+paru_get() {
+    echo "installing paru (AUR helper)"
+    pacman -S --needed --noconfirm base-devel
+    git clone https://aur.archlinux.org/paru.git /tmp/paru
+    chown $USERNAME /tmp/paru
+    cd /tmp/paru
+    su $USERNAME -c "makepkg -si --noconfirm"
+}
+
+# install packages using paru
+paru_install() {
+    echo "installing packages with paru"
+    su $USERNAME -c "paru -S --noconfirm clipse hyprnome hyrnotify hyproled hyprshot hyprpicker warp-terminal"
+}
+
+# enable quotas and create initial snapshot
+btrfs_setup() {
+    echo "setting up btrfs"
+    btrfs quota enable /
+    timeshift --btrfs --create --comments post-setup
+}
+
+# call main function
+main
