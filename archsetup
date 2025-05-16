@@ -16,20 +16,20 @@ fi
 
 # this is the entire script workflow
 main() {
-    elapsed make_user
-    elapsed git_setup
-    elapsed config
-    elapsed pacman_install
-    elapsed rust_setup
-    elapsed paru_get
-    elapsed paru_install
-    elapsed btrfs_setup    # disable if not using btrfs
-    elapsed clean
+    elapse make_user
+    elapse git_setup
+    elapse config
+    elapse pacman_install
+    elapse rust_setup
+    elapse paru_get
+    elapse paru_install
+    elapse btrfs_setup    # disable if not using btrfs
+    elapse clean
     echo "done"
 }
 
 # report time, send stdout to the void
-elapsed() {
+elapse() {
     local func="function $1"
     shift
     local start end elapsed
