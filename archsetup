@@ -49,9 +49,9 @@ make_user() {
 
 # set username and email for git
 git_setup() {
-    git config --global user.name "$GIT_USER"
-    git config --global user.email "$GIT_EMAIL"
-    git config pull.rebase false
+    su $USERNAME -c git config --global user.name "$GIT_USER"
+    su $USERNAME -c git config --global user.email "$GIT_EMAIL"
+    su $USERNAME -c git config pull.rebase false
 
 }
 
@@ -69,7 +69,7 @@ pacman_install() {
 
 # setup rust
 rust_setup() {
-    rustup default stable
+    su $USERNAME -c rustup default stable
 }
 # install paru aur helper
 paru_get() {
@@ -77,13 +77,12 @@ paru_get() {
     git clone https://aur.archlinux.org/paru.git /tmp/paru
     chown $USERNAME /tmp/paru
     cd /tmp/paru
-    su $USERNAME -c "makepkg -si --noconfirm"
+    su $USERNAME -c makepkg -si --noconfirm
 }
 
 # install packages using paru
 paru_install() {
-    echo "installing packages with paru"
-    su $USERNAME -c "paru -S --noconfirm ${AUR_PKG[@]}"
+    su $USERNAME -c paru -S --noconfirm "${AUR_PKG[@]}"
 }
 
 # enable quotas and create initial snapshot
